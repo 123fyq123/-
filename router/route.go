@@ -76,6 +76,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	})
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	// admin登录路由
 	adminLoginRouter := router.Group("/admin_login")
 
 	store, err := sessions.NewRedisStore(10, "tcp", "localhost:6379", "", []byte("secret"))
@@ -91,11 +92,17 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		controller.AdminLoginRegister(adminLoginRouter)
 	}
 
-	// store := sessions.NewCookieStore([]byte("secret"))
-	// apiNormalGroup := router.Group("/api")
-	// apiNormalGroup.Use(sessions.Sessions("mysession", store),
-	// 	middleware.RecoveryMiddleware(),
-	// 	middleware.RequestLog(),
-	// 	middleware.TranslationMiddleware())
+	// 设置获取admin接口路由
+	adminRouter := router.Group("/admin")
+	adminRouter.Use(
+		sessions.Sessions("mysession", store),
+		middleware.RecoveryMiddleware(),
+		middleware.RequestLog(),
+		middleware.SessionAuthMiddleware(),
+		middleware.TranslationMiddleware())
+	{
+		controller.AdminRegister(adminRouter)
+	}
+
 	return router
 }
