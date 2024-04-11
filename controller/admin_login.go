@@ -18,6 +18,7 @@ type AdminLoginController struct{}
 func AdminLoginRegister(group *gin.RouterGroup) {
 	adminLogin := &AdminLoginController{}
 	group.POST("/login", adminLogin.AdminLogin)
+	group.GET("/logout", adminLogin.AdminLoginOut)
 }
 
 // ListPage godoc
@@ -71,4 +72,21 @@ func (adminLogin *AdminLoginController) AdminLogin(c *gin.Context) {
 
 	out := &dto.AdminLoginOutput{Token: admin.UserName}
 	middleware.ResponseSuccess(c, out)
+}
+
+// ListPage godoc
+// @Summary 管理员退出
+// @Description 管理员退出
+// @Tags 管理员接口
+// @ID /admin_login/logout
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} middleware.Response{data=string} "success"
+// @Router /admin_login/logout [get]
+func (adminLogin *AdminLoginController) AdminLoginOut(c *gin.Context) {
+	sess := sessions.Default(c)
+	sess.Delete(public.AdminSessionInfoKey) // 清空session
+	sess.Save()
+
+	middleware.ResponseSuccess(c, "")
 }
