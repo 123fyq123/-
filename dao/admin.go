@@ -17,7 +17,7 @@ type Admin struct {
 	Password  string    `json:"password" gorm:"column:password" description:"密码"`
 	UpdatedAt time.Time `json:"update_at" gorm:"column:update_at" description:"更新时间"`
 	CreatedAt time.Time `json:"create_at" gorm:"column:create_at" description:"创建时间"`
-	IsDelete  int       `json:"is_delete" gorm:"column:is_delete" description:"删除"`
+	IsDelete  int       `json:"is_delete" gorm:"column:is_delete" description:"是否删除"`
 }
 
 func (t *Admin) TableName() string {
@@ -46,4 +46,8 @@ func (t *Admin) Find(c *gin.Context, tx *gorm.DB, search *Admin) (*Admin, error)
 		return nil, err
 	}
 	return out, nil
+}
+
+func (t *Admin) Save(c *gin.Context, tx *gorm.DB) error {
+	return tx.Save(t).Error
 }
