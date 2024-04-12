@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"reflect"
 	"regexp"
 	"strings"
@@ -110,6 +111,28 @@ func TranslationMiddleware() gin.HandlerFunc {
 				return true
 			})
 
+			val.RegisterValidation("valid_iplist", func(fl validator.FieldLevel) bool {
+				if fl.Field().String() == "" {
+					return true
+				}
+				for _, item := range strings.Split(fl.Field().String(), ",") {
+					matched, _ := regexp.Match(`\S+`, []byte(item)) //ip_addr
+					if !matched {
+						return false
+					}
+				}
+				return true
+			})
+			val.RegisterValidation("valid_weightlist", func(fl validator.FieldLevel) bool {
+				fmt.Println(fl.Field().String())
+				for _, ms := range strings.Split(fl.Field().String(), ",") {
+					if matched, _ := regexp.Match(`^\d+$`, []byte(ms)); !matched {
+						return false
+					}
+				}
+				return true
+			})
+
 			//---------------------------------------------------------------------------------------------------------------------------
 			//自定义验证器
 			//https://github.com/go-playground/validator/blob/v9/_examples/translations/main.go
@@ -161,6 +184,19 @@ func TranslationMiddleware() gin.HandlerFunc {
 			})
 
 			// http 权重列表格式
+			val.RegisterTranslation("valid_weightlist", trans, func(ut ut.Translator) error {
+				return ut.Add("valid_weightlist", "{0} 不符合输入格式", true)
+			}, func(ut ut.Translator, fe validator.FieldError) string {
+				t, _ := ut.T("valid_weightlist", fe.Field())
+				return t
+			})
+
+			val.RegisterTranslation("valid_iplist", trans, func(ut ut.Translator) error {
+				return ut.Add("valid_iplist", "{0} 不符合输入格式", true)
+			}, func(ut ut.Translator, fe validator.FieldError) string {
+				t, _ := ut.T("valid_iplist", fe.Field())
+				return t
+			})
 			val.RegisterTranslation("valid_weightlist", trans, func(ut ut.Translator) error {
 				return ut.Add("valid_weightlist", "{0} 不符合输入格式", true)
 			}, func(ut ut.Translator, fe validator.FieldError) string {
