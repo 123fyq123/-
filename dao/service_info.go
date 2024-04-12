@@ -85,7 +85,7 @@ func (t *ServiceInfo) PageList(c *gin.Context, tx *gorm.DB, param *dto.ServiceLi
 
 func (t *ServiceInfo) Find(c *gin.Context, tx *gorm.DB, search *ServiceInfo) (*ServiceInfo, error) {
 	out := &ServiceInfo{}
-	err := tx.WithContext(c).Where(search).Find(out).Error
+	err := tx.WithContext(c).Table(t.TableName()).Where(search).Take(out).Error
 	if err != nil {
 		return nil, err
 	}

@@ -2,6 +2,8 @@ package middleware
 
 import (
 	"reflect"
+	"regexp"
+	"strings"
 
 	"github.com/e421083458/go_gateway_demo/public"
 	"github.com/gin-gonic/gin"
@@ -50,12 +52,119 @@ func TranslationMiddleware() gin.HandlerFunc {
 				return fl.Field().String() == "admin"
 			})
 
+			// http 名称格式
+			val.RegisterValidation("valid_service_name", func(fl validator.FieldLevel) bool {
+				matched, _ := regexp.Match(`^[a-zA-Z0-9_]{6,128}$`, []byte(fl.Field().String()))
+				return matched
+			})
+
+			// http rule格式
+			val.RegisterValidation("valid_rule", func(fl validator.FieldLevel) bool {
+				matched, _ := regexp.Match(`^\S+$`, []byte(fl.Field().String()))
+				return matched
+			})
+
+			// http 重写rewrite格式
+			val.RegisterValidation("valid_url_rewrite", func(fl validator.FieldLevel) bool {
+				if fl.Field().String() == "" {
+					return true
+				}
+				for _, ms := range strings.Split(fl.Field().String(), ",") {
+					if len(strings.Split(ms, " ")) != 2 {
+						return false
+					}
+				}
+				return true
+			})
+
+			// http head头转换格式
+			val.RegisterValidation("valid_header_transfor", func(fl validator.FieldLevel) bool {
+				if fl.Field().String() == "" {
+					return true
+				}
+				for _, ms := range strings.Split(fl.Field().String(), ",") {
+					if len(strings.Split(ms, " ")) != 3 {
+						return false
+					}
+				}
+				return true
+			})
+
+			// http ip列表格式
+			val.RegisterValidation("valid_ipportlist", func(fl validator.FieldLevel) bool {
+				for _, ms := range strings.Split(fl.Field().String(), ",") {
+					if matched, _ := regexp.Match(`^\S+\:\d+$`, []byte(ms)); !matched {
+						return false
+					}
+				}
+				return true
+			})
+			// http 权重列表格式
+			val.RegisterValidation("valid_weightlist", func(fl validator.FieldLevel) bool {
+				for _, ms := range strings.Split(fl.Field().String(), "\n") {
+					matched, _ := regexp.Match(`^\d+$`, []byte(ms))
+					if !matched {
+						return false
+					}
+				}
+				return true
+			})
+
+			//---------------------------------------------------------------------------------------------------------------------------
 			//自定义验证器
 			//https://github.com/go-playground/validator/blob/v9/_examples/translations/main.go
 			val.RegisterTranslation("is_valid_username", trans, func(ut ut.Translator) error {
 				return ut.Add("is_valid_username", "{0} 填写不正确哦", true)
 			}, func(ut ut.Translator, fe validator.FieldError) string {
 				t, _ := ut.T("is_valid_username", fe.Field())
+				return t
+			})
+
+			// http 名称格式
+			val.RegisterTranslation("valid_service_name", trans, func(ut ut.Translator) error {
+				return ut.Add("valid_service_name", "{0} 不符合输入格式", true)
+			}, func(ut ut.Translator, fe validator.FieldError) string {
+				t, _ := ut.T("valid_service_name", fe.Field())
+				return t
+			})
+
+			// http rule格式
+			val.RegisterTranslation("valid_rule", trans, func(ut ut.Translator) error {
+				return ut.Add("valid_rule", "{0} 必须是非空字符", true)
+			}, func(ut ut.Translator, fe validator.FieldError) string {
+				t, _ := ut.T("valid_rule", fe.Field())
+				return t
+			})
+
+			// http 重写rewrite格式
+			val.RegisterTranslation("valid_url_rewrite", trans, func(ut ut.Translator) error {
+				return ut.Add("valid_url_rewrite", "{0} 不符合输入格式", true)
+			}, func(ut ut.Translator, fe validator.FieldError) string {
+				t, _ := ut.T("valid_url_rewrite", fe.Field())
+				return t
+			})
+
+			// http head头转换格式
+			val.RegisterTranslation("valid_header_transfor", trans, func(ut ut.Translator) error {
+				return ut.Add("valid_header_transfor", "{0} 不符合输入格式", true)
+			}, func(ut ut.Translator, fe validator.FieldError) string {
+				t, _ := ut.T("valid_header_transfor", fe.Field())
+				return t
+			})
+
+			// http ip列表格式
+			val.RegisterTranslation("valid_ipportlist", trans, func(ut ut.Translator) error {
+				return ut.Add("valid_ipportlist", "{0} 不符合输入格式", true)
+			}, func(ut ut.Translator, fe validator.FieldError) string {
+				t, _ := ut.T("valid_ipportlist", fe.Field())
+				return t
+			})
+
+			// http 权重列表格式
+			val.RegisterTranslation("valid_weightlist", trans, func(ut ut.Translator) error {
+				return ut.Add("valid_weightlist", "{0} 不符合输入格式", true)
+			}, func(ut ut.Translator, fe validator.FieldError) string {
+				t, _ := ut.T("valid_weightlist", fe.Field())
 				return t
 			})
 			break
