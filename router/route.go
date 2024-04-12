@@ -98,7 +98,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		sessions.Sessions("mysession", store),
 		middleware.RecoveryMiddleware(),
 		middleware.RequestLog(),
-		middleware.SessionAuthMiddleware(),
+		middleware.SessionAuthMiddleware(), // 验证
 		middleware.TranslationMiddleware())
 	{
 		controller.AdminRegister(adminRouter)
@@ -110,10 +110,23 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		sessions.Sessions("mysession", store),
 		middleware.RecoveryMiddleware(),
 		middleware.RequestLog(),
-		middleware.SessionAuthMiddleware(),
+		middleware.SessionAuthMiddleware(), // 验证
 		middleware.TranslationMiddleware())
 	{
 		controller.ServiceRegister(serviceRouter)
 	}
+
+	// 租户管理
+	appRouter := router.Group("/app")
+	appRouter.Use(
+		sessions.Sessions("mysession", store),
+		middleware.RecoveryMiddleware(),
+		middleware.RequestLog(),
+		middleware.SessionAuthMiddleware(), // 验证
+		middleware.TranslationMiddleware())
+	{
+		controller.APPRegister(appRouter)
+	}
+
 	return router
 }
