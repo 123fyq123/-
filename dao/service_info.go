@@ -84,6 +84,17 @@ func (t *ServiceInfo) PageList(c *gin.Context, tx *gorm.DB, param *dto.ServiceLi
 	return list, total, nil
 }
 
+func (t *ServiceInfo) GroupByLoadType(c *gin.Context, tx *gorm.DB) ([]dto.DashServiceStatItemOutput, error) {
+
+	list := []dto.DashServiceStatItemOutput{}
+	query := tx.WithContext(c)
+	if err := query.Table(t.TableName()).Where("is_delete=0").Select("load_type, count(*) as num").Group("load_type").Scan(&list).Error; err != nil {
+		return nil, err
+	}
+
+	return list, nil
+}
+
 func (t *ServiceInfo) Find(c *gin.Context, tx *gorm.DB, search *ServiceInfo) (*ServiceInfo, error) {
 	out := &ServiceInfo{}
 	err := tx.WithContext(c).Table(t.TableName()).Where(search).Take(out).Error
