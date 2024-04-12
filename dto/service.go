@@ -16,6 +16,15 @@ func (param *ServiceListInput) BindValidParam(c *gin.Context) error {
 	return public.DefaultGetValidParams(c, param)
 }
 
+type ServiceDeleteInput struct {
+	ID int64 `json:"id" form:"id" comment:"服务ID" example:"56" validate:""` //关键词
+}
+
+// 绑定结构体并校验参数
+func (param *ServiceDeleteInput) BindValidParam(c *gin.Context) error {
+	return public.DefaultGetValidParams(c, param)
+}
+
 type ServiceListItemOutput struct {
 	ID          int64  `json:"id" form:"id"`                     //id
 	ServiceName string `json:"service_name" form:"service_name"` //服务名称

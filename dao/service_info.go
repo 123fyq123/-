@@ -71,11 +71,11 @@ func (t *ServiceInfo) PageList(c *gin.Context, tx *gorm.DB, param *dto.ServiceLi
 	list := []ServiceInfo{}
 	offset := (param.PageNo - 1) * param.PageSize // 偏移量
 	query := tx.WithContext(c)
-	query.Table(t.TableName()).Where("is_delete=0")
+	query = query.Table(t.TableName()).Where("is_delete=0")
 	if param.Info != "" {
 		query = query.Where("(service_name like ? or service_desc like ?)", "%"+param.Info+"%", "%"+param.Info+"%")
 	}
-	if err := query.Limit(param.PageSize).Offset(offset).Find(&list).Error; err != nil && err != gorm.ErrRecordNotFound {
+	if err := query.Limit(param.PageSize).Offset(offset).Order("id desc").Find(&list).Error; err != nil && err != gorm.ErrRecordNotFound {
 		return nil, 0, err
 	}
 
@@ -93,5 +93,5 @@ func (t *ServiceInfo) Find(c *gin.Context, tx *gorm.DB, search *ServiceInfo) (*S
 }
 
 func (t *ServiceInfo) Save(c *gin.Context, tx *gorm.DB) error {
-	return tx.Save(t).Error
+	return tx.WithContext(c).Save(t).Error
 }
