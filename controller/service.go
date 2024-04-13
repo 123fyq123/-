@@ -45,7 +45,6 @@ func ServiceRegister(group *gin.RouterGroup) {
 // @Router /service/service_list [get]
 func (service *ServiceController) ServiceList(c *gin.Context) {
 	params := &dto.ServiceListInput{}
-	// 验证失败
 	if err := params.BindValidParam(c); err != nil {
 		middleware.ResponseError(c, 2000, err)
 		return
@@ -56,7 +55,8 @@ func (service *ServiceController) ServiceList(c *gin.Context) {
 		middleware.ResponseError(c, 2001, err)
 		return
 	}
-	// 从db中分页读取基本信息
+
+	//从db中分页读取基本信息
 	serviceInfo := &dao.ServiceInfo{}
 	list, total, err := serviceInfo.PageList(c, tx, params)
 	if err != nil {
@@ -64,51 +64,45 @@ func (service *ServiceController) ServiceList(c *gin.Context) {
 		return
 	}
 
-	// 格式化输出信息 因为读取的是serviceInfo 要输出ServiceListItemOutput
+	//格式化输出信息
 	outList := []dto.ServiceListItemOutput{}
 	for _, listItem := range list {
-		// 1.http前缀接入：clusterIP + clusterPort + Path
-		// 2.http域名接入：domain
-		// 3.tcp和grpc接入 clusterIP + servicePort
-		serviceDetail, err := listItem.ServiceDetail(c, tx, &listItem) // 根据serviceIP查找对应的detail，detail里面有各种rule和loadbalance等
+		serviceDetail, err := listItem.ServiceDetail(c, tx, &listItem)
 		if err != nil {
 			middleware.ResponseError(c, 2003, err)
 			return
 		}
+		//1、http后缀接入 clusterIP+clusterPort+path
+		//2、http域名接入 domain
+		//3、tcp、grpc接入 clusterIP+servicePort
 		serviceAddr := "unknow"
 		clusterIP := lib.GetStringConf("base.cluster.cluster_ip")
 		clusterPort := lib.GetStringConf("base.cluster.cluster_port")
 		clusterSSLPort := lib.GetStringConf("base.cluster.cluster_ssl_port")
-
-		// http前缀
-		if serviceDetail.Info.LoadType == public.LoadTypeHTTP && serviceDetail.HTTPRule.RuleType == public.HTTPRuleTypePrefixURL &&
-			serviceDetail.HTTPRule.NeedHttps == 1 { // 支持https
+		if serviceDetail.Info.LoadType == public.LoadTypeHTTP &&
+			serviceDetail.HTTPRule.RuleType == public.HTTPRuleTypePrefixURL &&
+			serviceDetail.HTTPRule.NeedHttps == 1 {
 			serviceAddr = fmt.Sprintf("%s:%s%s", clusterIP, clusterSSLPort, serviceDetail.HTTPRule.Rule)
 		}
-
-		if serviceDetail.Info.LoadType == public.LoadTypeHTTP && serviceDetail.HTTPRule.RuleType == public.HTTPRuleTypePrefixURL &&
+		if serviceDetail.Info.LoadType == public.LoadTypeHTTP &&
+			serviceDetail.HTTPRule.RuleType == public.HTTPRuleTypePrefixURL &&
 			serviceDetail.HTTPRule.NeedHttps == 0 {
 			serviceAddr = fmt.Sprintf("%s:%s%s", clusterIP, clusterPort, serviceDetail.HTTPRule.Rule)
 		}
-
-		// http域名
-		if serviceDetail.Info.LoadType == public.LoadTypeHTTP && serviceDetail.HTTPRule.RuleType == public.HTTPRuleTypeDomain {
+		if serviceDetail.Info.LoadType == public.LoadTypeHTTP &&
+			serviceDetail.HTTPRule.RuleType == public.HTTPRuleTypeDomain {
 			serviceAddr = serviceDetail.HTTPRule.Rule
 		}
-
-		// tcp
 		if serviceDetail.Info.LoadType == public.LoadTypeTCP {
 			serviceAddr = fmt.Sprintf("%s:%d", clusterIP, serviceDetail.TCPRule.Port)
 		}
-
-		// grpc
 		if serviceDetail.Info.LoadType == public.LoadTypeGRPC {
 			serviceAddr = fmt.Sprintf("%s:%d", clusterIP, serviceDetail.GRPCRule.Port)
 		}
-
 		ipList := serviceDetail.LoadBalance.GetIPListByModel()
 		outItem := dto.ServiceListItemOutput{
 			ID:          listItem.ID,
+			LoadType:    listItem.LoadType,
 			ServiceName: listItem.ServiceName,
 			ServiceDesc: listItem.ServiceDesc,
 			ServiceAddr: serviceAddr,
@@ -314,7 +308,7 @@ func (service *ServiceController) ServiceAddHTTP(c *gin.Context) {
 	// save http表
 	httpRule := &dao.HttpRule{
 		ServiceID:      serviceModel.ID,
-		RuleType:       params.RoundType,
+		RuleType:       params.RuleType,
 		Rule:           params.Rule,
 		NeedHttps:      params.NeedHttps,
 		NeedStripUri:   params.NeedStripUri,
@@ -376,7 +370,6 @@ func (service *ServiceController) ServiceAddHTTP(c *gin.Context) {
 // @Router /service/service_update_http [post]
 func (service *ServiceController) ServiceUpdateHTTP(c *gin.Context) {
 	params := &dto.ServiceUpdateHTTPInput{}
-	// 验证失败
 	if err := params.BindValidParam(c); err != nil {
 		middleware.ResponseError(c, 2000, err)
 		return
@@ -392,8 +385,6 @@ func (service *ServiceController) ServiceUpdateHTTP(c *gin.Context) {
 		middleware.ResponseError(c, 2002, err)
 		return
 	}
-
-	// 开启事务，因为要更新很多表
 	tx = tx.Begin()
 	serviceInfo := &dao.ServiceInfo{ServiceName: params.ServiceName}
 	serviceInfo, err = serviceInfo.Find(c, tx, serviceInfo)
@@ -410,7 +401,6 @@ func (service *ServiceController) ServiceUpdateHTTP(c *gin.Context) {
 	}
 
 	info := serviceDetail.Info
-	// 更新服务描述
 	info.ServiceDesc = params.ServiceDesc
 	if err := info.Save(c, tx); err != nil {
 		tx.Rollback()
@@ -418,7 +408,6 @@ func (service *ServiceController) ServiceUpdateHTTP(c *gin.Context) {
 		return
 	}
 
-	// 修改http表
 	httpRule := serviceDetail.HTTPRule
 	httpRule.NeedHttps = params.NeedHttps
 	httpRule.NeedStripUri = params.NeedStripUri
@@ -598,7 +587,6 @@ func (admin *ServiceController) ServiceUpdateTcp(c *gin.Context) {
 
 	info := detail.Info
 	info.ServiceDesc = params.ServiceDesc
-	info.UpdatedAt = time.Now()
 	if err := info.Save(c, tx); err != nil {
 		tx.Rollback()
 		middleware.ResponseError(c, 2003, err)
