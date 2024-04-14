@@ -2,12 +2,12 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"fyqcode.top/go_gateway/golang_common/lib"
+	"fyqcode.top/go_gateway/http_proxy_router"
 	"fyqcode.top/go_gateway/router"
 )
 
@@ -44,10 +44,19 @@ func main() {
 		lib.InitModule(*config)
 		defer lib.Destroy()
 
-		fmt.Println("start server...")
+		go func() {
+			http_proxy_router.HttpServerRun()
+		}()
+
+		go func() {
+			http_proxy_router.HttpsServerRun()
+		}()
 
 		quit := make(chan os.Signal)
 		signal.Notify(quit, syscall.SIGKILL, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM)
 		<-quit
+
+		http_proxy_router.HttpServerStop()
+		http_proxy_router.HttpsServerStop()
 	}
 }
