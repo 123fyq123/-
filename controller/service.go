@@ -1,17 +1,17 @@
 package controller
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 	"time"
 
-	"github.com/e421083458/go_gateway_demo/dao"
-	"github.com/e421083458/go_gateway_demo/dto"
-	"github.com/e421083458/go_gateway_demo/middleware"
-	"github.com/e421083458/go_gateway_demo/public"
-	"github.com/e421083458/golang_common/lib"
+	dao "fyqcode.top/go_gateway/dao"
+	dto "fyqcode.top/go_gateway/dto"
+	"fyqcode.top/go_gateway/golang_common/lib"
+	middleware "fyqcode.top/go_gateway/middleware"
+	public "fyqcode.top/go_gateway/public"
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 )
 
 type ServiceController struct{}
@@ -192,7 +192,6 @@ func (service *ServiceController) ServiceDetail(c *gin.Context) {
 		middleware.ResponseError(c, 2003, err)
 		return
 	}
-
 	middleware.ResponseSuccess(c, serviceDetail)
 }
 
@@ -213,37 +212,18 @@ func (service *ServiceController) ServiceStat(c *gin.Context) {
 		return
 	}
 
-	// tx, err := lib.GetGormPool("default")
-	// if err != nil {
-	// 	middleware.ResponseError(c, 2001, err)
-	// 	return
-	// }
-
 	//读取基本信息
-	// serviceInfo := &dao.ServiceInfo{ID: params.ID}
-	// serviceInfo, err = serviceInfo.Find(c, tx, serviceInfo)
-	// if err != nil {
-	// 	middleware.ResponseError(c, 2002, err)
-	// 	return
-	// }
-	// _, err = serviceInfo.ServiceDetail(c, tx, serviceInfo)
-	// if err != nil {
-	// 	middleware.ResponseError(c, 2003, err)
-	// 	return
-	// }
 
-	// 统计今日流量
 	todayList := []int64{}
-	for i := 0; i <= time.Now().Hour(); i++ {
+	currentTime := time.Now()
+	for i := 0; i <= currentTime.Hour(); i++ {
 		todayList = append(todayList, 0)
 	}
 
-	// 统计昨日流量
 	yesterdayList := []int64{}
 	for i := 0; i <= 23; i++ {
-		yesterdayList = append(yesterdayList, 0)
+		yesterdayList = append(yesterdayList, 9)
 	}
-
 	middleware.ResponseSuccess(c, &dto.ServiceStatOutput{
 		Today:     todayList,
 		Yesterday: yesterdayList,
@@ -262,15 +242,8 @@ func (service *ServiceController) ServiceStat(c *gin.Context) {
 // @Router /service/service_add_http [post]
 func (service *ServiceController) ServiceAddHTTP(c *gin.Context) {
 	params := &dto.ServiceAddHTTPInput{}
-	// 验证失败
 	if err := params.BindValidParam(c); err != nil {
 		middleware.ResponseError(c, 2000, err)
-		return
-	}
-
-	tx, err := lib.GetGormPool("default")
-	if err != nil {
-		middleware.ResponseError(c, 2001, err)
 		return
 	}
 
@@ -279,19 +252,23 @@ func (service *ServiceController) ServiceAddHTTP(c *gin.Context) {
 		return
 	}
 
-	// 开启事务，因为要更新很多表
-	tx = tx.Begin()
-	httpUrl := &dao.HttpRule{RuleType: params.RuleType, Rule: params.Rule}
-	if _, err := httpUrl.Find(c, tx, httpUrl); err == nil {
-		tx.Rollback()
-		middleware.ResponseError(c, 2003, errors.New("服务接入前缀或域名已存在"))
+	tx, err := lib.GetGormPool("default")
+	if err != nil {
+		middleware.ResponseError(c, 2001, err)
 		return
 	}
-
+	tx = tx.Begin()
 	serviceInfo := &dao.ServiceInfo{ServiceName: params.ServiceName}
 	if _, err = serviceInfo.Find(c, tx, serviceInfo); err == nil {
 		tx.Rollback()
 		middleware.ResponseError(c, 2002, errors.New("服务已存在"))
+		return
+	}
+
+	httpUrl := &dao.HttpRule{RuleType: params.RuleType, Rule: params.Rule}
+	if _, err := httpUrl.Find(c, tx, httpUrl); err == nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2003, errors.New("服务接入前缀或域名已存在"))
 		return
 	}
 
@@ -304,8 +281,7 @@ func (service *ServiceController) ServiceAddHTTP(c *gin.Context) {
 		middleware.ResponseError(c, 2005, err)
 		return
 	}
-
-	// save http表
+	//serviceModel.ID
 	httpRule := &dao.HttpRule{
 		ServiceID:      serviceModel.ID,
 		RuleType:       params.RuleType,
@@ -322,7 +298,6 @@ func (service *ServiceController) ServiceAddHTTP(c *gin.Context) {
 		return
 	}
 
-	// save权限控制表
 	accessControl := &dao.AccessControl{
 		ServiceID:         serviceModel.ID,
 		OpenAuth:          params.OpenAuth,
@@ -337,7 +312,6 @@ func (service *ServiceController) ServiceAddHTTP(c *gin.Context) {
 		return
 	}
 
-	// save负载均衡表
 	loadbalance := &dao.LoadBalance{
 		ServiceID:              serviceModel.ID,
 		RoundType:              params.RoundType,
@@ -353,8 +327,7 @@ func (service *ServiceController) ServiceAddHTTP(c *gin.Context) {
 		middleware.ResponseError(c, 2008, err)
 		return
 	}
-
-	tx.Commit() // 事务结束
+	tx.Commit()
 	middleware.ResponseSuccess(c, "")
 }
 
@@ -449,7 +422,7 @@ func (service *ServiceController) ServiceUpdateHTTP(c *gin.Context) {
 	middleware.ResponseSuccess(c, "")
 }
 
-// ServiceAddTcp godoc
+// ServiceAddHttp godoc
 // @Summary tcp服务添加
 // @Description tcp服务添加
 // @Tags 服务管理
@@ -641,7 +614,7 @@ func (admin *ServiceController) ServiceUpdateTcp(c *gin.Context) {
 	return
 }
 
-// ServiceAddGrpc godoc
+// ServiceAddHttp godoc
 // @Summary grpc服务添加
 // @Description grpc服务添加
 // @Tags 服务管理
@@ -690,12 +663,7 @@ func (admin *ServiceController) ServiceAddGrpc(c *gin.Context) {
 		return
 	}
 
-	tx, err := lib.GetGormPool("default")
-	if err != nil {
-		middleware.ResponseError(c, 2000, err)
-		return
-	}
-	tx = tx.Begin()
+	tx := lib.GORMDefaultPool.Begin()
 	info := &dao.ServiceInfo{
 		LoadType:    public.LoadTypeGRPC,
 		ServiceName: params.ServiceName,
@@ -750,7 +718,7 @@ func (admin *ServiceController) ServiceAddGrpc(c *gin.Context) {
 	return
 }
 
-// ServiceUpdateGrpc godoc
+// ServiceUpdateTcp godoc
 // @Summary grpc服务更新
 // @Description grpc服务更新
 // @Tags 服务管理
@@ -773,17 +741,12 @@ func (admin *ServiceController) ServiceUpdateGrpc(c *gin.Context) {
 		return
 	}
 
-	tx, err := lib.GetGormPool("default")
-	if err != nil {
-		middleware.ResponseError(c, 2000, err)
-		return
-	}
+	tx := lib.GORMDefaultPool.Begin()
 
-	tx = tx.Begin()
 	service := &dao.ServiceInfo{
 		ID: params.ID,
 	}
-	detail, err := service.ServiceDetail(c, tx, service)
+	detail, err := service.ServiceDetail(c, lib.GORMDefaultPool, service)
 	if err != nil {
 		middleware.ResponseError(c, 2003, err)
 		return
@@ -791,7 +754,6 @@ func (admin *ServiceController) ServiceUpdateGrpc(c *gin.Context) {
 
 	info := detail.Info
 	info.ServiceDesc = params.ServiceDesc
-	info.CreatedAt = detail.Info.CreatedAt
 	if err := info.Save(c, tx); err != nil {
 		tx.Rollback()
 		middleware.ResponseError(c, 2004, err)

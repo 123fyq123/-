@@ -3,7 +3,7 @@ package dto
 import (
 	"time"
 
-	"github.com/e421083458/go_gateway_demo/public"
+	"fyqcode.top/go_gateway/public"
 	"github.com/gin-gonic/gin"
 )
 

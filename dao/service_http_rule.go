@@ -1,8 +1,9 @@
 package dao
 
 import (
+	"fyqcode.top/go_gateway/public"
+	"github.com/e421083458/gorm"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type HttpRule struct {
@@ -23,12 +24,12 @@ func (t *HttpRule) TableName() string {
 
 func (t *HttpRule) Find(c *gin.Context, tx *gorm.DB, search *HttpRule) (*HttpRule, error) {
 	model := &HttpRule{}
-	err := tx.WithContext(c).Table(t.TableName()).Where(search).Take(model).Error
+	err := tx.SetCtx(public.GetGinTraceContext(c)).Where(search).Find(model).Error
 	return model, err
 }
 
 func (t *HttpRule) Save(c *gin.Context, tx *gorm.DB) error {
-	if err := tx.WithContext(c).Save(t).Error; err != nil {
+	if err := tx.SetCtx(public.GetGinTraceContext(c)).Save(t).Error; err != nil {
 		return err
 	}
 	return nil
@@ -37,7 +38,7 @@ func (t *HttpRule) Save(c *gin.Context, tx *gorm.DB) error {
 func (t *HttpRule) ListByServiceID(c *gin.Context, tx *gorm.DB, serviceID int64) ([]HttpRule, int64, error) {
 	var list []HttpRule
 	var count int64
-	query := tx.WithContext(c)
+	query := tx.SetCtx(public.GetGinTraceContext(c))
 	query = query.Table(t.TableName()).Select("*")
 	query = query.Where("service_id=?", serviceID)
 	err := query.Order("id desc").Find(&list).Error

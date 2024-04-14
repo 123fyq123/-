@@ -3,7 +3,7 @@ package dto
 import (
 	"time"
 
-	"github.com/e421083458/go_gateway_demo/public"
+	"fyqcode.top/go_gateway/public"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,10 +17,9 @@ type AdminInfoOutput struct {
 }
 
 type ChangePwdInput struct {
-	Password string `form:"password" json:"password" comment:"密码"  validate:"required" example:"123456"` // 密码
+	Password string `json:"password" form:"password" comment:"密码" example:"123456" validate:"required"` //密码
 }
 
-// 绑定结构体并校验参数
 func (param *ChangePwdInput) BindValidParam(c *gin.Context) error {
 	return public.DefaultGetValidParams(c, param)
 }

@@ -3,10 +3,11 @@ package middleware
 import (
 	"errors"
 	"fmt"
-	"github.com/e421083458/go_gateway_demo/public"
-	"github.com/e421083458/golang_common/lib"
-	"github.com/gin-gonic/gin"
 	"runtime/debug"
+
+	"fyqcode.top/go_gateway/golang_common/lib"
+	"fyqcode.top/go_gateway/public"
+	"github.com/gin-gonic/gin"
 )
 
 // RecoveryMiddleware捕获所有panic，并且返回错误信息

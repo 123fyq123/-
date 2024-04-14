@@ -2,11 +2,12 @@ package middleware
 
 import (
 	"bytes"
-	"github.com/e421083458/go_gateway_demo/public"
-	"github.com/e421083458/golang_common/lib"
-	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"time"
+
+	"fyqcode.top/go_gateway/golang_common/lib"
+	"fyqcode.top/go_gateway/public"
+	"github.com/gin-gonic/gin"
 )
 
 // 请求进入日志

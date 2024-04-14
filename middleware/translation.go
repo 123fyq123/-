@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/e421083458/go_gateway_demo/public"
+	"fyqcode.top/go_gateway/public"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/locales/en"
 	"github.com/go-playground/locales/zh"
@@ -49,7 +49,7 @@ func TranslationMiddleware() gin.HandlerFunc {
 
 			//自定义验证方法
 			//https://github.com/go-playground/validator/blob/v9/_examples/custom-validation/main.go
-			val.RegisterValidation("is_valid_username", func(fl validator.FieldLevel) bool {
+			val.RegisterValidation("valid_username", func(fl validator.FieldLevel) bool {
 				return fl.Field().String() == "admin"
 			})
 

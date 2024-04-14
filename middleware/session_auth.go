@@ -3,7 +3,7 @@ package middleware
 import (
 	"errors"
 
-	"github.com/e421083458/go_gateway_demo/public"
+	"fyqcode.top/go_gateway/public"
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 )

@@ -1,15 +1,15 @@
 package controller
 
 import (
-	"errors"
 	"time"
 
-	"github.com/e421083458/go_gateway_demo/dao"
-	"github.com/e421083458/go_gateway_demo/dto"
-	"github.com/e421083458/go_gateway_demo/middleware"
-	"github.com/e421083458/go_gateway_demo/public"
-	"github.com/e421083458/golang_common/lib"
+	dao "fyqcode.top/go_gateway/dao"
+	dto "fyqcode.top/go_gateway/dto"
+	"fyqcode.top/go_gateway/golang_common/lib"
+	middleware "fyqcode.top/go_gateway/middleware"
+	public "fyqcode.top/go_gateway/public"
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 )
 
 // APPControllerRegister admin路由注册
@@ -45,12 +45,7 @@ func (admin *APPController) APPList(c *gin.Context) {
 		return
 	}
 	info := &dao.App{}
-	tx, err := lib.GetGormPool("default")
-	if err != nil {
-		middleware.ResponseError(c, 2001, err)
-		return
-	}
-	list, total, err := info.APPList(c, tx, params)
+	list, total, err := info.APPList(c, lib.GORMDefaultPool, params)
 	if err != nil {
 		middleware.ResponseError(c, 2002, err)
 		return
@@ -58,8 +53,6 @@ func (admin *APPController) APPList(c *gin.Context) {
 
 	outputList := []dto.APPListItemOutput{}
 	for _, item := range list {
-		realQps := int64(0)
-		realQpd := int64(0)
 		outputList = append(outputList, dto.APPListItemOutput{
 			ID:       item.ID,
 			AppID:    item.AppID,
@@ -68,8 +61,8 @@ func (admin *APPController) APPList(c *gin.Context) {
 			WhiteIPS: item.WhiteIPS,
 			Qpd:      item.Qpd,
 			Qps:      item.Qps,
-			RealQpd:  realQps,
-			RealQps:  realQpd,
+			RealQpd:  0,
+			RealQps:  0,
 		})
 	}
 	output := dto.APPListOutput{
@@ -243,23 +236,15 @@ func (admin *APPController) AppStatistics(c *gin.Context) {
 		return
 	}
 
-	search := &dao.App{
-		ID: params.ID,
-	}
-	_, err := search.Find(c, lib.GORMDefaultPool, search)
-	if err != nil {
-		middleware.ResponseError(c, 2002, err)
-		return
-	}
-
 	//今日流量全天小时级访问统计
 	todayStat := []int64{}
-	for i := 0; i <= time.Now().Hour(); i++ {
+	for i := 0; i <= time.Now().In(lib.TimeLocation).Hour(); i++ {
 		todayStat = append(todayStat, 0)
 	}
 
 	//昨日流量全天小时级访问统计
 	yesterdayStat := []int64{}
+
 	for i := 0; i <= 23; i++ {
 		yesterdayStat = append(yesterdayStat, 0)
 	}

@@ -3,10 +3,10 @@ package router
 import (
 	"log"
 
-	"github.com/e421083458/go_gateway_demo/controller"
-	"github.com/e421083458/go_gateway_demo/docs"
-	"github.com/e421083458/go_gateway_demo/middleware"
-	"github.com/e421083458/golang_common/lib"
+	"fyqcode.top/go_gateway/controller"
+	"fyqcode.top/go_gateway/docs"
+	"fyqcode.top/go_gateway/golang_common/lib"
+	"fyqcode.top/go_gateway/middleware"
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"

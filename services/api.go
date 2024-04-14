@@ -1,10 +1,10 @@
 package services
 
 // import (
-// 	"github.com/e421083458/go_gateway_demo/dao"
-// 	"github.com/e421083458/go_gateway_demo/dto"
-// 	"github.com/e421083458/go_gateway_demo/middleware"
-// 	"github.com/e421083458/golang_common/lib"
+// 	"fyqcode.top/go_gateway/dao"
+// 	"fyqcode.top/go_gateway/dto"
+// 	"fyqcode.top/go_gateway/middleware"
+// 	"fyqcode.top/go_gateway/golang_common/lib"
 // 	"github.com/gin-gonic/gin"
 // )
 

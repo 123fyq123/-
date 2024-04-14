@@ -110,7 +110,7 @@ var doc = `{
         },
         "/admin_login/login": {
             "post": {
-                "description": "管理员登录",
+                "description": "管理员登陆",
                 "consumes": [
                     "application/json"
                 ],
@@ -120,7 +120,7 @@ var doc = `{
                 "tags": [
                     "管理员接口"
                 ],
-                "summary": "管理员登录",
+                "summary": "管理员登陆",
                 "operationId": "/admin_login/login",
                 "parameters": [
                     {
@@ -480,7 +480,7 @@ var doc = `{
         },
         "/dashboard/flow_stat": {
             "get": {
-                "description": "流量统计",
+                "description": "服务统计",
                 "consumes": [
                     "application/json"
                 ],
@@ -490,7 +490,7 @@ var doc = `{
                 "tags": [
                     "首页大盘"
                 ],
-                "summary": "流量统计",
+                "summary": "服务统计",
                 "operationId": "/dashboard/flow_stat",
                 "responses": {
                     "200": {
@@ -1441,7 +1441,7 @@ var doc = `{
                     "example": "123456"
                 },
                 "username": {
-                    "description": "用户名",
+                    "description": "管理员用户名",
                     "type": "string",
                     "example": "admin"
                 }
@@ -1494,7 +1494,6 @@ var doc = `{
                     }
                 },
                 "legend": {
-                    "description": "有几种分类：http，tcp，grpc",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -1588,7 +1587,7 @@ var doc = `{
                     "type": "string"
                 },
                 "clientip_flow_limit": {
-                    "description": "客户端ip限流",
+                    "description": "\u0008客户端ip限流",
                     "type": "integer"
                 },
                 "header_transfor": {
@@ -1660,7 +1659,7 @@ var doc = `{
                     "type": "string"
                 },
                 "weight_list": {
-                    "description": "权重列表",
+                    "description": "\u0008权重列表",
                     "type": "string"
                 },
                 "white_list": {
@@ -1780,14 +1779,14 @@ var doc = `{
             "type": "object",
             "properties": {
                 "today": {
-                    "description": "今日流量",
+                    "description": "列表",
                     "type": "array",
                     "items": {
                         "type": "integer"
                     }
                 },
                 "yesterday": {
-                    "description": "昨日流量",
+                    "description": "列表",
                     "type": "array",
                     "items": {
                         "type": "integer"
@@ -1869,7 +1868,7 @@ var doc = `{
                     "type": "string"
                 },
                 "clientip_flow_limit": {
-                    "description": "客户端ip限流",
+                    "description": "\u0008客户端ip限流",
                     "type": "integer"
                 },
                 "header_transfor": {
@@ -1908,7 +1907,8 @@ var doc = `{
                 },
                 "rule": {
                     "description": "域名或者前缀",
-                    "type": "string"
+                    "type": "string",
+                    "example": "/test_http_service_indb"
                 },
                 "rule_type": {
                     "description": "接入类型",
@@ -1916,7 +1916,8 @@ var doc = `{
                 },
                 "service_desc": {
                     "description": "服务描述",
-                    "type": "string"
+                    "type": "string",
+                    "example": "test_http_service_indb"
                 },
                 "service_flow_limit": {
                     "description": "服务端限流",
@@ -1925,7 +1926,7 @@ var doc = `{
                 "service_name": {
                     "description": "服务名",
                     "type": "string",
-                    "example": "string"
+                    "example": "test_http_service_indb"
                 },
                 "upstream_connect_timeout": {
                     "description": "建立连接超时, 单位s",
@@ -1948,9 +1949,9 @@ var doc = `{
                     "type": "string"
                 },
                 "weight_list": {
-                    "description": "权重列表",
+                    "description": "\u0008权重列表",
                     "type": "string",
-                    "example": "1"
+                    "example": "50"
                 },
                 "white_list": {
                     "description": "白名单ip",

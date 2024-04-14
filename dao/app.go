@@ -5,15 +5,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/e421083458/go_gateway_demo/dto"
-	"github.com/e421083458/golang_common/lib"
+	dto "fyqcode.top/go_gateway/dto"
+	"fyqcode.top/go_gateway/golang_common/lib"
+	public "fyqcode.top/go_gateway/public"
+	"github.com/e421083458/gorm"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type App struct {
 	ID        int64     `json:"id" gorm:"primary_key"`
-	AppID     string    `json:"app_id" gorm:"column:app_id" description:"租户id	"`
+	AppID     string    `json:"app_id" gorm:"column:app_id" description:"租户id	"`
 	Name      string    `json:"name" gorm:"column:name" description:"租户名称	"`
 	Secret    string    `json:"secret" gorm:"column:secret" description:"密钥"`
 	WhiteIPS  string    `json:"white_ips" gorm:"column:white_ips" description:"ip白名单，支持前缀匹配"`
@@ -30,12 +31,12 @@ func (t *App) TableName() string {
 
 func (t *App) Find(c *gin.Context, tx *gorm.DB, search *App) (*App, error) {
 	model := &App{}
-	err := tx.WithContext(c).Table(t.TableName()).Where(search).Take(model).Error
+	err := tx.SetCtx(public.GetGinTraceContext(c)).Where(search).Find(model).Error
 	return model, err
 }
 
 func (t *App) Save(c *gin.Context, tx *gorm.DB) error {
-	if err := tx.WithContext(c).Save(t).Error; err != nil {
+	if err := tx.SetCtx(public.GetGinTraceContext(c)).Save(t).Error; err != nil {
 		return err
 	}
 	return nil
@@ -49,7 +50,7 @@ func (t *App) APPList(c *gin.Context, tx *gorm.DB, params *dto.APPListInput) ([]
 
 	//limit offset,pagesize
 	offset := (pageNo - 1) * pageSize
-	query := tx.WithContext(c)
+	query := tx.SetCtx(public.GetGinTraceContext(c))
 	query = query.Table(t.TableName()).Select("*")
 	query = query.Where("is_delete=?", 0)
 	if params.Info != "" {

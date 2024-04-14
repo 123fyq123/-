@@ -248,7 +248,7 @@ definitions:
         example: "123456"
         type: string
       username:
-        description: 用户名
+        description: 管理员用户名
         example: admin
         type: string
     required:
@@ -287,7 +287,6 @@ definitions:
           $ref: '#/definitions/dto.DashServiceStatItemOutput'
         type: array
       legend:
-        description: 有几种分类：http，tcp，grpc
         items:
           type: string
         type: array
@@ -346,7 +345,7 @@ definitions:
         description: 黑名单ip
         type: string
       clientip_flow_limit:
-        description: 客户端ip限流
+        description: "\b客户端ip限流"
         type: integer
       header_transfor:
         description: header转换
@@ -400,7 +399,7 @@ definitions:
         description: url重写功能
         type: string
       weight_list:
-        description: 权重列表
+        description: "\b权重列表"
         type: string
       white_list:
         description: 白名单ip
@@ -490,12 +489,12 @@ definitions:
   dto.ServiceStatOutput:
     properties:
       today:
-        description: 今日流量
+        description: 列表
         items:
           type: integer
         type: array
       yesterday:
-        description: 昨日流量
+        description: 列表
         items:
           type: integer
         type: array
@@ -546,7 +545,7 @@ definitions:
         description: 黑名单ip
         type: string
       clientip_flow_limit:
-        description: 客户端ip限流
+        description: "\b客户端ip限流"
         type: integer
       header_transfor:
         description: header转换
@@ -576,19 +575,21 @@ definitions:
         type: integer
       rule:
         description: 域名或者前缀
+        example: /test_http_service_indb
         type: string
       rule_type:
         description: 接入类型
         type: integer
       service_desc:
         description: 服务描述
+        example: test_http_service_indb
         type: string
       service_flow_limit:
         description: 服务端限流
         type: integer
       service_name:
         description: 服务名
-        example: string
+        example: test_http_service_indb
         type: string
       upstream_connect_timeout:
         description: 建立连接超时, 单位s
@@ -606,8 +607,8 @@ definitions:
         description: url重写功能
         type: string
       weight_list:
-        description: 权重列表
-        example: "1"
+        description: "\b权重列表"
+        example: "50"
         type: string
       white_list:
         description: 白名单ip
@@ -742,7 +743,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 管理员登录
+      description: 管理员登陆
       operationId: /admin_login/login
       parameters:
       - description: body
@@ -763,7 +764,7 @@ paths:
                 data:
                   $ref: '#/definitions/dto.AdminLoginOutput'
               type: object
-      summary: 管理员登录
+      summary: 管理员登陆
       tags:
       - 管理员接口
   /admin_login/logout:
@@ -964,7 +965,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 流量统计
+      description: 服务统计
       operationId: /dashboard/flow_stat
       produces:
       - application/json
@@ -978,7 +979,7 @@ paths:
                 data:
                   $ref: '#/definitions/dto.ServiceStatOutput'
               type: object
-      summary: 流量统计
+      summary: 服务统计
       tags:
       - 首页大盘
   /dashboard/panel_group_data:

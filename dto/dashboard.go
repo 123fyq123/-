@@ -7,7 +7,6 @@ type PanelGroupDataOutput struct {
 	TodayRequestNum int64 `json:"todayRequestNum"`
 }
 
-// 例如:http对应的人数
 type DashServiceStatItemOutput struct {
 	Name     string `json:"name"`
 	LoadType int    `json:"load_type"`
@@ -15,6 +14,6 @@ type DashServiceStatItemOutput struct {
 }
 
 type DashServiceStatOutput struct {
-	Legend []string                    `json:"legend"` // 有几种分类：http，tcp，grpc
+	Legend []string                    `json:"legend"`
 	Data   []DashServiceStatItemOutput `json:"data"`
 }

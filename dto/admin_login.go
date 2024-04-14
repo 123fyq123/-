@@ -3,7 +3,7 @@ package dto
 import (
 	"time"
 
-	"github.com/e421083458/go_gateway_demo/public"
+	"fyqcode.top/go_gateway/public"
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,15 +14,14 @@ type AdminSessionInfo struct {
 }
 
 type AdminLoginInput struct {
-	UserName string `form:"username" json:"username" comment:"用户名"  validate:"required,is_valid_username" example:"admin"` // 用户名
-	Password string `form:"password" json:"password" comment:"密码"  validate:"required" example:"123456"`                   // 密码
+	UserName string `json:"username" form:"username" comment:"管理员用户名" example:"admin" validate:"required,valid_username"` //管理员用户名
+	Password string `json:"password" form:"password" comment:"密码" example:"123456" validate:"required"`                   //密码
 }
 
-// 绑定结构体并校验参数
 func (param *AdminLoginInput) BindValidParam(c *gin.Context) error {
 	return public.DefaultGetValidParams(c, param)
 }
 
 type AdminLoginOutput struct {
-	Token string `form:"token" json:"token" comment:"token"  validate:"" example:"token"` // token
+	Token string `json:"token" form:"token" comment:"token" example:"token" validate:""` //token
 }

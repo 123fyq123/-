@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/e421083458/go_gateway_demo/dao"
-	"github.com/e421083458/go_gateway_demo/dto"
-	"github.com/e421083458/go_gateway_demo/middleware"
-	"github.com/e421083458/go_gateway_demo/public"
-	"github.com/e421083458/golang_common/lib"
+	dao "fyqcode.top/go_gateway/dao"
+	dto "fyqcode.top/go_gateway/dto"
+	"fyqcode.top/go_gateway/golang_common/lib"
+	middleware "fyqcode.top/go_gateway/middleware"
+	public "fyqcode.top/go_gateway/public"
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
@@ -68,17 +68,17 @@ func (adminlogin *AdminController) AdminInfo(c *gin.Context) {
 // @Router /admin/change_pwd [post]
 func (adminlogin *AdminController) ChangePwd(c *gin.Context) {
 	params := &dto.ChangePwdInput{}
-	// 验证失败
 	if err := params.BindValidParam(c); err != nil {
 		middleware.ResponseError(c, 2000, err)
 		return
 	}
 
-	// 1.session里面读取用户信息到结构体 sessInfo
-	// 2.sessInfo.ID 读取数据库 adminInfo
-	// 3.params.password + adminInfo.salt sha256 -> saltPassword
-	// 4.saltPassword -> adminInfo.password 执行数据库保存
+	//1. session读取用户信息到结构体 sessInfo
+	//2. sessInfo.ID 读取数据库信息 adminInfo
+	//3. params.password+adminInfo.salt sha256 saltPassword
+	//4. saltPassword==> adminInfo.password 执行数据保存
 
+	//session读取用户信息到结构体
 	sess := sessions.Default(c)
 	sessInfo := sess.Get(public.AdminSessionInfoKey)
 	adminSessionInfo := &dto.AdminSessionInfo{}
@@ -87,13 +87,12 @@ func (adminlogin *AdminController) ChangePwd(c *gin.Context) {
 		return
 	}
 
-	// 从数据库中读取adminInfo
+	//从数据库中读取 adminInfo
 	tx, err := lib.GetGormPool("default")
 	if err != nil {
 		middleware.ResponseError(c, 2001, err)
 		return
 	}
-
 	adminInfo := &dao.Admin{}
 	adminInfo, err = adminInfo.Find(c, tx, (&dao.Admin{UserName: adminSessionInfo.UserName}))
 	if err != nil {
@@ -101,14 +100,14 @@ func (adminlogin *AdminController) ChangePwd(c *gin.Context) {
 		return
 	}
 
-	// 生成新的加盐密码
+	//生成新密码 saltPassword
 	saltPassword := public.GenSaltPassword(adminInfo.Salt, params.Password)
 	adminInfo.Password = saltPassword
-	// 数据库保存
+
+	//执行数据保存
 	if err := adminInfo.Save(c, tx); err != nil {
 		middleware.ResponseError(c, 2003, err)
 		return
 	}
-
 	middleware.ResponseSuccess(c, "")
 }

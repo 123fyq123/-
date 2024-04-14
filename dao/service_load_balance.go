@@ -3,8 +3,9 @@ package dao
 import (
 	"strings"
 
+	"fyqcode.top/go_gateway/public"
+	"github.com/e421083458/gorm"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type LoadBalance struct {
@@ -30,18 +31,17 @@ func (t *LoadBalance) TableName() string {
 
 func (t *LoadBalance) Find(c *gin.Context, tx *gorm.DB, search *LoadBalance) (*LoadBalance, error) {
 	model := &LoadBalance{}
-	err := tx.WithContext(c).Where(search).Find(model).Error
+	err := tx.SetCtx(public.GetGinTraceContext(c)).Where(search).Find(model).Error
 	return model, err
 }
 
 func (t *LoadBalance) Save(c *gin.Context, tx *gorm.DB) error {
-	if err := tx.WithContext(c).Save(t).Error; err != nil {
+	if err := tx.SetCtx(public.GetGinTraceContext(c)).Save(t).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-// 返回IP列表
 func (t *LoadBalance) GetIPListByModel() []string {
 	return strings.Split(t.IpList, ",")
 }

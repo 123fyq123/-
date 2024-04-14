@@ -1,8 +1,9 @@
 package dao
 
 import (
+	"fyqcode.top/go_gateway/public"
+	"github.com/e421083458/gorm"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type AccessControl struct {
@@ -12,7 +13,7 @@ type AccessControl struct {
 	BlackList         string `json:"black_list" gorm:"column:black_list" description:"黑名单ip	"`
 	WhiteList         string `json:"white_list" gorm:"column:white_list" description:"白名单ip	"`
 	WhiteHostName     string `json:"white_host_name" gorm:"column:white_host_name" description:"白名单主机	"`
-	ClientIPFlowLimit int    `json:"clientip_flow_limit" gorm:"column:clientip_flow_limit" description:"客户端ip限流	"`
+	ClientIPFlowLimit int    `json:"clientip_flow_limit" gorm:"column:clientip_flow_limit" description:"客户端ip限流	"`
 	ServiceFlowLimit  int    `json:"service_flow_limit" gorm:"column:service_flow_limit" description:"服务端限流	"`
 }
 
@@ -22,12 +23,12 @@ func (t *AccessControl) TableName() string {
 
 func (t *AccessControl) Find(c *gin.Context, tx *gorm.DB, search *AccessControl) (*AccessControl, error) {
 	model := &AccessControl{}
-	err := tx.WithContext(c).Where(search).Find(model).Error
+	err := tx.SetCtx(public.GetGinTraceContext(c)).Where(search).Find(model).Error
 	return model, err
 }
 
 func (t *AccessControl) Save(c *gin.Context, tx *gorm.DB) error {
-	if err := tx.WithContext(c).Save(t).Error; err != nil {
+	if err := tx.SetCtx(public.GetGinTraceContext(c)).Save(t).Error; err != nil {
 		return err
 	}
 	return nil
@@ -36,7 +37,7 @@ func (t *AccessControl) Save(c *gin.Context, tx *gorm.DB) error {
 func (t *AccessControl) ListBYServiceID(c *gin.Context, tx *gorm.DB, serviceID int64) ([]AccessControl, int64, error) {
 	var list []AccessControl
 	var count int64
-	query := tx.WithContext(c)
+	query := tx.SetCtx(public.GetGinTraceContext(c))
 	query = query.Table(t.TableName()).Select("*")
 	query = query.Where("service_id=?", serviceID)
 	err := query.Order("id desc").Find(&list).Error

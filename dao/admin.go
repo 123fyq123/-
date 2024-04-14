@@ -1,13 +1,13 @@
 package dao
 
 import (
-	"errors"
 	"time"
 
-	"github.com/e421083458/go_gateway_demo/dto"
-	"github.com/e421083458/go_gateway_demo/public"
+	dto "fyqcode.top/go_gateway/dto"
+	public "fyqcode.top/go_gateway/public"
+	"github.com/e421083458/gorm"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
+	"github.com/pkg/errors"
 )
 
 type Admin struct {
@@ -25,10 +25,7 @@ func (t *Admin) TableName() string {
 }
 
 func (t *Admin) LoginCheck(c *gin.Context, tx *gorm.DB, param *dto.AdminLoginInput) (*Admin, error) {
-	adminInfo, err := t.Find(c, tx, (&Admin{
-		UserName: param.UserName,
-		IsDelete: 0,
-	}))
+	adminInfo, err := t.Find(c, tx, (&Admin{UserName: param.UserName, IsDelete: 0}))
 	if err != nil {
 		return nil, errors.New("用户信息不存在")
 	}
@@ -41,7 +38,7 @@ func (t *Admin) LoginCheck(c *gin.Context, tx *gorm.DB, param *dto.AdminLoginInp
 
 func (t *Admin) Find(c *gin.Context, tx *gorm.DB, search *Admin) (*Admin, error) {
 	out := &Admin{}
-	err := tx.WithContext(c).Where(search).Find(out).Error
+	err := tx.SetCtx(public.GetGinTraceContext(c)).Where(search).Find(out).Error
 	if err != nil {
 		return nil, err
 	}
@@ -49,5 +46,5 @@ func (t *Admin) Find(c *gin.Context, tx *gorm.DB, search *Admin) (*Admin, error)
 }
 
 func (t *Admin) Save(c *gin.Context, tx *gorm.DB) error {
-	return tx.Save(t).Error
+	return tx.SetCtx(public.GetGinTraceContext(c)).Save(t).Error
 }
