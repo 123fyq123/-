@@ -2,6 +2,7 @@ package dao
 
 import (
 	"errors"
+	"fmt"
 	"net/http/httptest"
 	"strings"
 	"sync"
@@ -71,32 +72,28 @@ func (s *ServiceManager) HTTPAccessMode(c *gin.Context) (*ServiceDetail, error) 
 	return nil, errors.New("not matched service")
 }
 
-// 加载服务列表进内存
 func (s *ServiceManager) LoadOnce() error {
 	s.init.Do(func() {
-
-		params := &dto.ServiceListInput{
-			PageNo:   1,
-			PageSize: 99999,
-		}
+		serviceInfo := &ServiceInfo{}
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
 		tx, err := lib.GetGormPool("default")
 		if err != nil {
 			s.err = err
 			return
 		}
-		serviceInfo := &ServiceInfo{}
+		params := &dto.ServiceListInput{PageNo: 1, PageSize: 99999}
 		list, _, err := serviceInfo.PageList(c, tx, params)
 		if err != nil {
 			s.err = err
 			return
 		}
-
 		s.Locker.Lock()
 		defer s.Locker.Unlock()
 		for _, listItem := range list {
 			tmpItem := listItem
 			serviceDetail, err := tmpItem.ServiceDetail(c, tx, &tmpItem)
+			fmt.Println("serviceDetail")
+			fmt.Println(public.Obj2Json(serviceDetail))
 			if err != nil {
 				s.err = err
 				return
@@ -105,6 +102,5 @@ func (s *ServiceManager) LoadOnce() error {
 			s.ServiceSlice = append(s.ServiceSlice, serviceDetail)
 		}
 	})
-
 	return s.err
 }
