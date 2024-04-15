@@ -1,15 +1,15 @@
 package dao
 
 import (
+	"errors"
 	"net/http/httptest"
 	"strings"
 	"sync"
 
 	dto "fyqcode.top/go_gateway/dto"
 	"fyqcode.top/go_gateway/golang_common/lib"
-	public "fyqcode.top/go_gateway/public"
+	"fyqcode.top/go_gateway/public"
 	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
 )
 
 type ServiceDetail struct {
@@ -21,17 +21,18 @@ type ServiceDetail struct {
 	AccessControl *AccessControl `json:"access_control" description:"access_control"`
 }
 
+// 暴露给外面的是这个handler
 var ServiceManagerHandler *ServiceManager
 
 func init() {
-	ServiceManagerHandler = NewServiceManager()
+	ServiceManagerHandler = NewServiceManager() // 饿汉式单例
 }
 
 type ServiceManager struct {
-	ServiceMap   map[string]*ServiceDetail
-	ServiceSlice []*ServiceDetail
+	ServiceMap   map[string]*ServiceDetail // 通过name方式获取服务
+	ServiceSlice []*ServiceDetail          // 遍历获取服务
 	Locker       sync.RWMutex
-	init         sync.Once
+	init         sync.Once // 单例
 	err          error
 }
 
@@ -42,28 +43,6 @@ func NewServiceManager() *ServiceManager {
 		Locker:       sync.RWMutex{},
 		init:         sync.Once{},
 	}
-}
-
-func (s *ServiceManager) GetTcpServiceList() []*ServiceDetail {
-	list := []*ServiceDetail{}
-	for _, serverItem := range s.ServiceSlice {
-		tempItem := serverItem
-		if tempItem.Info.LoadType == public.LoadTypeTCP {
-			list = append(list, tempItem)
-		}
-	}
-	return list
-}
-
-func (s *ServiceManager) GetGrpcServiceList() []*ServiceDetail {
-	list := []*ServiceDetail{}
-	for _, serverItem := range s.ServiceSlice {
-		tempItem := serverItem
-		if tempItem.Info.LoadType == public.LoadTypeGRPC {
-			list = append(list, tempItem)
-		}
-	}
-	return list
 }
 
 func (s *ServiceManager) HTTPAccessMode(c *gin.Context) (*ServiceDetail, error) {
@@ -92,28 +71,32 @@ func (s *ServiceManager) HTTPAccessMode(c *gin.Context) (*ServiceDetail, error) 
 	return nil, errors.New("not matched service")
 }
 
+// 加载服务列表进内存
 func (s *ServiceManager) LoadOnce() error {
 	s.init.Do(func() {
-		serviceInfo := &ServiceInfo{}
+
+		params := &dto.ServiceListInput{
+			PageNo:   1,
+			PageSize: 99999,
+		}
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
 		tx, err := lib.GetGormPool("default")
 		if err != nil {
 			s.err = err
 			return
 		}
-		params := &dto.ServiceListInput{PageNo: 1, PageSize: 99999}
+		serviceInfo := &ServiceInfo{}
 		list, _, err := serviceInfo.PageList(c, tx, params)
 		if err != nil {
 			s.err = err
 			return
 		}
+
 		s.Locker.Lock()
 		defer s.Locker.Unlock()
 		for _, listItem := range list {
 			tmpItem := listItem
 			serviceDetail, err := tmpItem.ServiceDetail(c, tx, &tmpItem)
-			//fmt.Println("serviceDetail")
-			//fmt.Println(public.Obj2Json(serviceDetail))
 			if err != nil {
 				s.err = err
 				return
@@ -122,5 +105,6 @@ func (s *ServiceManager) LoadOnce() error {
 			s.ServiceSlice = append(s.ServiceSlice, serviceDetail)
 		}
 	})
+
 	return s.err
 }

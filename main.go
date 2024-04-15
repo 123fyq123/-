@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"fyqcode.top/go_gateway/dao"
 	"fyqcode.top/go_gateway/golang_common/lib"
 	"fyqcode.top/go_gateway/http_proxy_router"
 	"fyqcode.top/go_gateway/router"
@@ -43,7 +44,7 @@ func main() {
 	} else {
 		lib.InitModule(*config)
 		defer lib.Destroy()
-
+		dao.ServiceManagerHandler.LoadOnce() // 加载服务列表
 		go func() {
 			http_proxy_router.HttpServerRun()
 		}()

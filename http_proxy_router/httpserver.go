@@ -8,6 +8,7 @@ import (
 
 	"fyqcode.top/go_gateway/cert_file"
 	"fyqcode.top/go_gateway/golang_common/lib"
+	"fyqcode.top/go_gateway/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,7 +19,7 @@ var (
 
 func HttpServerRun() {
 	gin.SetMode(lib.ConfBase.DebugMode)
-	r := InitRouter()
+	r := InitRouter(middleware.RecoveryMiddleware(), middleware.RequestLog()) // 使用中间件
 	HttpSrvHandler = &http.Server{
 		Addr:           lib.GetStringConf("proxy.http.addr"),
 		Handler:        r,
@@ -34,7 +35,7 @@ func HttpServerRun() {
 
 func HttpsServerRun() {
 	gin.SetMode(lib.ConfBase.DebugMode)
-	r := InitRouter()
+	r := InitRouter(middleware.RecoveryMiddleware(), middleware.RequestLog()) // 使用中间件
 	HttpsSrvHandler = &http.Server{
 		Addr:           lib.GetStringConf("proxy.https.addr"),
 		Handler:        r,
