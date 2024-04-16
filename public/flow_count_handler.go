@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// 流量统计单例化
 var FlowCounterHandler *FlowCounter
 
 type FlowCounter struct {

@@ -1,13 +1,9 @@
 package reverse_proxy
 
 import (
-	"bytes"
-	"compress/gzip"
-	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"strconv"
 	"strings"
 
 	"fyqcode.top/go_gateway/middleware"
@@ -46,27 +42,28 @@ func NewLoadBalanceReverseProxy(c *gin.Context, lb load_balance.LoadBalance, tra
 		if strings.Contains(resp.Header.Get("Connection"), "Upgrade") {
 			return nil
 		}
-		var payload []byte
-		var readErr error
-		if strings.Contains(resp.Header.Get("Content-Encoding"), "gzip") {
-			gr, err := gzip.NewReader(resp.Body)
-			if err != nil {
-				return err
-			}
-			payload, readErr = ioutil.ReadAll(gr)
-			resp.Header.Del("Content-Encoding")
-		} else {
-			payload, readErr = ioutil.ReadAll(resp.Body)
-		}
-		if readErr != nil {
-			return readErr
-		}
+		// 优化2
+		// var payload []byte
+		// var readErr error
+		// if strings.Contains(resp.Header.Get("Content-Encoding"), "gzip") {
+		// 	gr, err := gzip.NewReader(resp.Body)
+		// 	if err != nil {
+		// 		return err
+		// 	}
+		// 	payload, readErr = ioutil.ReadAll(gr)
+		// 	resp.Header.Del("Content-Encoding")
+		// } else {
+		// 	payload, readErr = ioutil.ReadAll(resp.Body)
+		// }
+		// if readErr != nil {
+		// 	return readErr
+		// }
 
-		c.Set("status_code", resp.StatusCode)
-		c.Set("payload", payload)
-		resp.Body = ioutil.NopCloser(bytes.NewBuffer(payload))
-		resp.ContentLength = int64(len(payload))
-		resp.Header.Set("Content-Length", strconv.FormatInt(int64(len(payload)), 10))
+		// c.Set("status_code", resp.StatusCode)
+		// c.Set("payload", payload)
+		// resp.Body = ioutil.NopCloser(bytes.NewBuffer(payload))
+		// resp.ContentLength = int64(len(payload))
+		// resp.Header.Set("Content-Length", strconv.FormatInt(int64(len(payload)), 10))
 		return nil
 	}
 

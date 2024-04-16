@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// 流量统计
 func HTTPFlowCountMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		serverInterface, ok := c.Get("service")
@@ -37,7 +38,7 @@ func HTTPFlowCountMiddleware() gin.HandlerFunc {
 		fmt.Printf("totalCounter qps:%v  daycount:%v", totalCounter.QPS, dayCount)
 
 		// 服务
-		serviceCounter, err := public.FlowCounterHandler.GetCounter(public.FlowCountServicePrefix + serviceDetail.Info.ServiceName)
+		serviceCounter, err := public.FlowCounterHandler.GetCounter(public.FlowServicePrefix + serviceDetail.Info.ServiceName)
 		if err != nil {
 			middleware.ResponseError(c, 4002, err)
 			c.Abort()
@@ -45,8 +46,8 @@ func HTTPFlowCountMiddleware() gin.HandlerFunc {
 		}
 		serviceCounter.Increase() // 原子增加计数器
 
-		dayServiceCount, _ := serviceCounter.GetDayData(time.Now())
-		fmt.Printf("serviceCounter qps:%v  daycount:%v", serviceCounter.QPS, dayServiceCount)
+		// dayServiceCount, _ := serviceCounter.GetDayData(time.Now())
+		// fmt.Printf("serviceCounter qps:%v  daycount:%v", serviceCounter.QPS, dayServiceCount)
 
 		c.Next()
 	}

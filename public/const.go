@@ -19,9 +19,9 @@ const (
 	RedisFlowHourKey = "flow_hour_count"
 
 	// 统计类型：全站、服务、租户
-	FlowTotal              = "flow_total"
-	FlowCountServicePrefix = "flow_service"
-	FlowCountAppPrefix     = "flow_app"
+	FlowTotal         = "flow_total"
+	FlowServicePrefix = "flow_service"
+	FlowAppPrefix     = "flow_app"
 )
 
 var (

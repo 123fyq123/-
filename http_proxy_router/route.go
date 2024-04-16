@@ -6,7 +6,9 @@ import (
 )
 
 func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
-	router := gin.Default()
+	// 优化1
+	// router := gin.Default()
+	router := gin.New()
 	router.Use(middlewares...) // 使用中间件
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -17,6 +19,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	router.Use( // 使用中间件
 		http_proxy_middleware.HTTPAccessModeMiddleware(),     // 服务接入
 		http_proxy_middleware.HTTPFlowCountMiddleware(),      // 流量统计
+		http_proxy_middleware.HTTPFlowLimitMiddleware(),      // 限流
 		http_proxy_middleware.HTTPWhiteListMiddleware(),      // ip白名单
 		http_proxy_middleware.HTTPBlackListMiddleware(),      // ip黑名单
 		http_proxy_middleware.HTTPHeaderTransferMiddleware(), // heaer头转换
