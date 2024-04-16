@@ -220,15 +220,38 @@ func (service *ServiceController) ServiceStat(c *gin.Context) {
 
 	//读取基本信息
 
+	tx, err := lib.GetGormPool("default")
+	if err != nil {
+		middleware.ResponseError(c, 2001, err)
+		return
+	}
+	serviceInfo := &dao.ServiceInfo{ID: params.ID}
+	serviceDetail, err := serviceInfo.ServiceDetail(c, tx, serviceInfo)
+	if err != nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2002, err)
+		return
+	}
+
+	counter, err := public.FlowCounterHandler.GetCounter(public.FlowCountServicePrefix + serviceDetail.Info.ServiceName)
+	if err != nil {
+		middleware.ResponseError(c, 2003, errors.New("服务不存在"))
+		return
+	}
 	todayList := []int64{}
 	currentTime := time.Now()
 	for i := 0; i <= currentTime.Hour(); i++ {
-		todayList = append(todayList, 0)
+		dateTime := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), i, 0, 0, 0, lib.TimeLocation)
+		hourData, _ := counter.GetHourData(dateTime)
+		todayList = append(todayList, hourData)
 	}
 
+	yesterdaytTime := currentTime.Add(-1 * time.Duration(time.Hour*24))
 	yesterdayList := []int64{}
 	for i := 0; i <= 23; i++ {
-		yesterdayList = append(yesterdayList, 9)
+		dateTime := time.Date(yesterdaytTime.Year(), yesterdaytTime.Month(), yesterdaytTime.Day(), i, 0, 0, 0, lib.TimeLocation)
+		hourData, _ := counter.GetHourData(dateTime)
+		yesterdayList = append(yesterdayList, hourData)
 	}
 	middleware.ResponseSuccess(c, &dto.ServiceStatOutput{
 		Today:     todayList,
