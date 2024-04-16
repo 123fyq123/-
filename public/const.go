@@ -13,6 +13,15 @@ const (
 	// http接入 域名:1or前缀:0
 	HTTPRuleTypePrefixURL = 0
 	HTTPRuleTypeDomain    = 1
+
+	// daykey和hourkey
+	RedisFlowDayKey  = "flow_day_count"
+	RedisFlowHourKey = "flow_hour_count"
+
+	// 统计类型：全站、服务、租户
+	FlowTotal              = "flow_total"
+	FlowCountServicePrefix = "flow_service"
+	FlowCountAppPrefix     = "flow_app"
 )
 
 var (

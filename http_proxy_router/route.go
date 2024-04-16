@@ -16,6 +16,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 
 	router.Use( // 使用中间件
 		http_proxy_middleware.HTTPAccessModeMiddleware(),     // 服务接入
+		http_proxy_middleware.HTTPFlowCountMiddleware(),      // 流量统计
 		http_proxy_middleware.HTTPWhiteListMiddleware(),      // ip白名单
 		http_proxy_middleware.HTTPBlackListMiddleware(),      // ip黑名单
 		http_proxy_middleware.HTTPHeaderTransferMiddleware(), // heaer头转换
