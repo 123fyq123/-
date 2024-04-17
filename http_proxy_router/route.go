@@ -1,7 +1,9 @@
 package http_proxy_router
 
 import (
+	"fyqcode.top/go_gateway/controller"
 	"fyqcode.top/go_gateway/http_proxy_middleware"
+	"fyqcode.top/go_gateway/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,7 +18,8 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		})
 	})
 
-	router.Use( // 使用中间件
+	root := router.Group("/")
+	root.Use( // 使用中间件
 		http_proxy_middleware.HTTPAccessModeMiddleware(),     // 服务接入
 		http_proxy_middleware.HTTPFlowCountMiddleware(),      // 流量统计
 		http_proxy_middleware.HTTPFlowLimitMiddleware(),      // 限流
@@ -27,5 +30,13 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		http_proxy_middleware.HTTPUrlRewriteMiddleware(),     // url重写
 		http_proxy_middleware.HTTPReverseProxyMiddleware(),   // 反向代理
 	)
+
+	oauth := router.Group("oauth")
+	oauth.Use(
+		middleware.TranslationMiddleware(),
+	)
+	{
+		controller.OAuthRegister(oauth)
+	}
 	return router
 }
