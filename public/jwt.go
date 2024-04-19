@@ -2,7 +2,6 @@ package public
 
 import (
 	"errors"
-	"time"
 
 	"github.com/dgrijalva/jwt-go"
 )
@@ -15,9 +14,6 @@ func JwtDecode(tokenString string) (*jwt.StandardClaims, error) {
 		return nil, err
 	}
 	if claims, ok := token.Claims.(*jwt.StandardClaims); ok {
-		if claims.ExpiresAt < time.Now().Unix() {
-			return nil, errors.New("request expired")
-		}
 		return claims, nil
 	} else {
 		return nil, errors.New("token is not jwt.StandardClaims")

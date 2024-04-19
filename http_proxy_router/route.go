@@ -32,8 +32,10 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 
 		// 权限校验
 		http_proxy_middleware.HTTPJwtAuthTokenMiddleware(), // jwt验证
-		http_proxy_middleware.HTTPWhiteListMiddleware(),    // ip白名单
-		http_proxy_middleware.HTTPBlackListMiddleware(),    // ip黑名单
+		http_proxy_middleware.HTTPJwtFlowCountMiddleware(), // 租户流量统计
+
+		http_proxy_middleware.HTTPWhiteListMiddleware(), // ip白名单
+		http_proxy_middleware.HTTPBlackListMiddleware(), // ip黑名单
 
 		// 重写
 		http_proxy_middleware.HTTPHeaderTransferMiddleware(), // heaer头转换

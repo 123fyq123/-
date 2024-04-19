@@ -2,8 +2,6 @@ package http_proxy_middleware
 
 import (
 	"errors"
-	"fmt"
-	"time"
 
 	"fyqcode.top/go_gateway/dao"
 	"fyqcode.top/go_gateway/middleware"
@@ -34,8 +32,8 @@ func HTTPFlowCountMiddleware() gin.HandlerFunc {
 			return
 		}
 		totalCounter.Increase() // 原子增加计数器
-		dayCount, _ := totalCounter.GetDayData(time.Now())
-		fmt.Printf("totalCounter qps:%v  daycount:%v", totalCounter.QPS, dayCount)
+		// dayCount, _ := totalCounter.GetDayData(time.Now())
+		// fmt.Printf("totalCounter qps:%v  daycount:%v", totalCounter.QPS, dayCount)
 
 		// 服务
 		serviceCounter, err := public.FlowCounterHandler.GetCounter(public.FlowServicePrefix + serviceDetail.Info.ServiceName)

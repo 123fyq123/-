@@ -2,7 +2,6 @@ package http_proxy_middleware
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
 	"fyqcode.top/go_gateway/dao"
@@ -39,9 +38,8 @@ func HTTPJwtAuthTokenMiddleware() gin.HandlerFunc {
 
 			appList := dao.AppManagerHandler.GetAppList()
 			for _, appInfo := range appList {
-				fmt.Printf("%v------%v\n", appInfo.AppID, claims.Issuer)
 				if appInfo.AppID == claims.Issuer {
-					c.Set("appDetail", appInfo)
+					c.Set("app", appInfo)
 					appMatched = true
 					break
 				}
