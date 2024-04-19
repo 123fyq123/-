@@ -45,6 +45,7 @@ func main() {
 		lib.InitModule(*config)
 		defer lib.Destroy()
 		dao.ServiceManagerHandler.LoadOnce() // 加载服务列表
+		dao.AppManagerHandler.LoadOnce()
 		go func() {
 			http_proxy_router.HttpServerRun()
 		}()

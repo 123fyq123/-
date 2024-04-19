@@ -1,16 +1,21 @@
 package controller
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"strings"
+	"time"
 
 	dao "fyqcode.top/go_gateway/dao"
 	dto "fyqcode.top/go_gateway/dto"
 	"fyqcode.top/go_gateway/golang_common/lib"
 	middleware "fyqcode.top/go_gateway/middleware"
 	public "fyqcode.top/go_gateway/public"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 )
 
 type OAuthController struct{}
@@ -36,8 +41,56 @@ func (oauth *OAuthController) Tokens(c *gin.Context) {
 		middleware.ResponseError(c, 2000, err)
 		return
 	}
-	output := &dto.TokensOutput{}
-	middleware.ResponseSuccess(c, output)
+
+	splits := strings.Split(c.GetHeader("Authorization"), " ")
+	if len(splits) != 2 {
+		middleware.ResponseError(c, 2001, errors.New("用户名或密码错误"))
+		return
+	}
+
+	appSecret, err := base64.StdEncoding.DecodeString(splits[1])
+	if err != nil {
+		middleware.ResponseError(c, 2002, err)
+		return
+	}
+
+	// 去除app_id secret
+	// 生成app_list
+	// 匹配app_id
+	// 基于jwt生成token
+	// 生成output
+
+	parts := strings.Split(string(appSecret), ":")
+	if len(parts) != 2 {
+		middleware.ResponseError(c, 2003, errors.New("用户名或密码错误"))
+		return
+	}
+
+	appList := dao.AppManagerHandler.GetAppList()
+	for _, appInfo := range appList {
+		if appInfo.AppID == parts[0] && appInfo.Secret == parts[1] {
+			claims := jwt.StandardClaims{
+				Issuer:    appInfo.AppID,
+				ExpiresAt: time.Now().Add(public.JwtExpires * time.Second).In(lib.TimeLocation).Unix(),
+			}
+			token, err := public.JwtEncode(claims)
+			if err != nil {
+				middleware.ResponseError(c, 2004, err)
+				return
+			}
+
+			output := &dto.TokensOutput{
+				ExpiresIn:   public.JwtExpires,
+				TokenType:   "Bearer",
+				AccessToken: token,
+				Scope:       "read_write",
+			}
+			middleware.ResponseSuccess(c, output)
+			return
+		}
+	}
+
+	middleware.ResponseError(c, 2005, errors.New("未匹配到正确的APP信息"))
 }
 
 // ChangePwd godoc
