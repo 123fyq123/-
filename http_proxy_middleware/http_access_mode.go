@@ -15,7 +15,7 @@ func HTTPAccessModeMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		//fmt.Println("matched service",public.Obj2Json(service))
+		// fmt.Println("matched service", public.Obj2Json(service))
 		c.Set("service", service)
 		c.Next()
 	}

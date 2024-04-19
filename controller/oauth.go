@@ -54,7 +54,7 @@ func (oauth *OAuthController) Tokens(c *gin.Context) {
 		return
 	}
 
-	// 去除app_id secret
+	// 取出app_id secret
 	// 生成app_list
 	// 匹配app_id
 	// 基于jwt生成token
