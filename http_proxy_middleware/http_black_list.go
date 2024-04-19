@@ -24,7 +24,6 @@ func HTTPBlackListMiddleware() gin.HandlerFunc {
 
 		whiteIpList := []string{}
 		blackIpList := []string{}
-		fmt.Println(len(whiteIpList))
 		if serviceDetail.AccessControl.WhiteList != "" {
 			whiteIpList = strings.Split(serviceDetail.AccessControl.WhiteList, ",")
 		}

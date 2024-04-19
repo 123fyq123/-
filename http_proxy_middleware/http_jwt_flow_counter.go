@@ -13,14 +13,6 @@ import (
 // JWT租户流量统计
 func HTTPJwtFlowCountMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// serverInterface, ok := c.Get("service")
-		// if !ok {
-		// 	middleware.ResponseError(c, 2001, errors.New("service not found"))
-		// 	c.Abort()
-		// 	return
-		// }
-		// serviceDetail := serverInterface.(*dao.ServiceDetail)
-
 		appInterface, ok := c.Get("app")
 		if !ok {
 			c.Next()
@@ -40,8 +32,6 @@ func HTTPJwtFlowCountMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-
-		fmt.Printf("appCounter qps:%v  daycount:%v", appCounter.QPS, appCounter.TotalCount)
 
 		c.Next()
 	}

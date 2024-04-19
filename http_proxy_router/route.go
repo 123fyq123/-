@@ -33,6 +33,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		// 权限校验
 		http_proxy_middleware.HTTPJwtAuthTokenMiddleware(), // jwt验证
 		http_proxy_middleware.HTTPJwtFlowCountMiddleware(), // 租户流量统计
+		http_proxy_middleware.HTTPJwtFlowLimitMiddleware(), //Jwt客户端限流
 
 		http_proxy_middleware.HTTPWhiteListMiddleware(), // ip白名单
 		http_proxy_middleware.HTTPBlackListMiddleware(), // ip黑名单
