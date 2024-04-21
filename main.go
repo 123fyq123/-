@@ -10,6 +10,7 @@ import (
 	"fyqcode.top/go_gateway/golang_common/lib"
 	"fyqcode.top/go_gateway/http_proxy_router"
 	"fyqcode.top/go_gateway/router"
+	"fyqcode.top/go_gateway/tcp_proxy_router"
 )
 
 // endpoint dashboard(后台管理)  server(代理服务器)
@@ -54,10 +55,15 @@ func main() {
 			http_proxy_router.HttpsServerRun()
 		}()
 
+		go func() {
+			tcp_proxy_router.TcpServerRun()
+		}()
+
 		quit := make(chan os.Signal)
 		signal.Notify(quit, syscall.SIGKILL, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM)
 		<-quit
 
+		tcp_proxy_router.TcpServerStop()
 		http_proxy_router.HttpServerStop()
 		http_proxy_router.HttpsServerStop()
 	}
