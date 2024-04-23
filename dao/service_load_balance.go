@@ -82,7 +82,7 @@ func init() {
 }
 
 func (lbr *LoadBalancer) GetLoadBalancer(service *ServiceDetail) (load_balance.LoadBalance, error) {
-	for _, lbrItem := range lbr.LoadBanlanceSlice { // 若已经有对应的服务，直接取出，否则新建
+	for _, lbrItem := range lbr.LoadBanlanceSlice {
 		if lbrItem.ServiceName == service.Info.ServiceName {
 			return lbrItem.LoadBanlance, nil
 		}

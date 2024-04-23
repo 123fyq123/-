@@ -107,10 +107,10 @@ func (s *ServiceManager) LoadOnce() error {
 
 func (s *ServiceManager) GetTcpServiceList() []*ServiceDetail {
 	list := []*ServiceDetail{}
-	for _, serviceItem := range s.ServiceSlice {
-		tmpItem := serviceItem
-		if tmpItem.Info.LoadType == public.LoadTypeTCP {
-			list = append(list, tmpItem)
+	for _, serverItem := range s.ServiceSlice {
+		tempItem := serverItem
+		if tempItem.Info.LoadType == public.LoadTypeTCP {
+			list = append(list, tempItem)
 		}
 	}
 	return list
@@ -118,10 +118,10 @@ func (s *ServiceManager) GetTcpServiceList() []*ServiceDetail {
 
 func (s *ServiceManager) GetGrpcServiceList() []*ServiceDetail {
 	list := []*ServiceDetail{}
-	for _, serviceItem := range s.ServiceSlice {
-		tmpItem := serviceItem
-		if tmpItem.Info.LoadType == public.LoadTypeGRPC {
-			list = append(list, tmpItem)
+	for _, serverItem := range s.ServiceSlice {
+		tempItem := serverItem
+		if tempItem.Info.LoadType == public.LoadTypeGRPC {
+			list = append(list, tempItem)
 		}
 	}
 	return list
