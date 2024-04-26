@@ -49,7 +49,7 @@ func (s *LoadBalanceZkConf) GetConf() []string {
 func (s *LoadBalanceZkConf) WatchConf() {
 	zkManager := zookeeper.NewZkManager(s.zkHosts)
 	zkManager.GetConnect()
-	fmt.Println("watchConf")
+	// fmt.Println("watchConf")
 	chanList, chanErr := zkManager.WatchServerListByPath(s.path)
 	go func() {
 		defer zkManager.Close()

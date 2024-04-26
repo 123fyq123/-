@@ -2,7 +2,6 @@ package dao
 
 import (
 	"errors"
-	"fmt"
 	"net/http/httptest"
 	"strings"
 	"sync"
@@ -92,8 +91,8 @@ func (s *ServiceManager) LoadOnce() error {
 		for _, listItem := range list {
 			tmpItem := listItem
 			serviceDetail, err := tmpItem.ServiceDetail(c, tx, &tmpItem)
-			fmt.Println("serviceDetail")
-			fmt.Println(public.Obj2Json(serviceDetail))
+			// fmt.Println("serviceDetail")
+			// fmt.Println(public.Obj2Json(serviceDetail))
 			if err != nil {
 				s.err = err
 				return

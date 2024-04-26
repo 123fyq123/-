@@ -45,9 +45,9 @@ func (s *LoadBalanceCheckConf) GetConf() []string {
 	return confList
 }
 
-//更新配置时，通知监听者也更新
+// 更新配置时，通知监听者也更新
 func (s *LoadBalanceCheckConf) WatchConf() {
-	fmt.Println("watchConf")
+	// fmt.Println("watchConf")
 	go func() {
 		confIpErrNum := map[string]int{}
 		for {
@@ -82,9 +82,9 @@ func (s *LoadBalanceCheckConf) WatchConf() {
 	}()
 }
 
-//更新配置时，通知监听者也更新
+// 更新配置时，通知监听者也更新
 func (s *LoadBalanceCheckConf) UpdateConf(conf []string) {
-	fmt.Println("UpdateConf", conf)
+	// fmt.Println("UpdateConf", conf)
 	s.activeList = conf
 	for _, obs := range s.observers {
 		obs.Update()

@@ -8,6 +8,7 @@ import (
 
 	"fyqcode.top/go_gateway/dao"
 	"fyqcode.top/go_gateway/golang_common/lib"
+	"fyqcode.top/go_gateway/grpc_proxy_router"
 	"fyqcode.top/go_gateway/http_proxy_router"
 	"fyqcode.top/go_gateway/router"
 	"fyqcode.top/go_gateway/tcp_proxy_router"
@@ -17,8 +18,8 @@ import (
 // config ./conf/prod/ (对应配置文件夹)
 
 var (
-	endpoint = flag.String("endpoint", "", "input endpoint like dashboard or server")
-	config   = flag.String("config", "", "input config file like ./conf/dev/")
+	endpoint = flag.String("endpoint", "server", "input endpoint like dashboard or server")
+	config   = flag.String("config", "./conf/dev/", "input config file like ./conf/dev/")
 )
 
 func main() {
@@ -59,11 +60,16 @@ func main() {
 			tcp_proxy_router.TcpServerRun()
 		}()
 
+		go func() {
+			grpc_proxy_router.GrpcServerRun()
+		}()
+
 		quit := make(chan os.Signal)
 		signal.Notify(quit, syscall.SIGKILL, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM)
 		<-quit
 
 		tcp_proxy_router.TcpServerStop()
+		grpc_proxy_router.GrpcServerStop()
 		http_proxy_router.HttpServerStop()
 		http_proxy_router.HttpsServerStop()
 	}

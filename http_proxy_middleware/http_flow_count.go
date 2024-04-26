@@ -32,8 +32,6 @@ func HTTPFlowCountMiddleware() gin.HandlerFunc {
 			return
 		}
 		totalCounter.Increase() // 原子增加计数器
-		// dayCount, _ := totalCounter.GetDayData(time.Now())
-		// fmt.Printf("totalCounter qps:%v  daycount:%v", totalCounter.QPS, dayCount)
 
 		// 服务
 		serviceCounter, err := public.FlowCounterHandler.GetCounter(public.FlowServicePrefix + serviceDetail.Info.ServiceName)
@@ -43,9 +41,6 @@ func HTTPFlowCountMiddleware() gin.HandlerFunc {
 			return
 		}
 		serviceCounter.Increase() // 原子增加计数器
-
-		// dayServiceCount, _ := serviceCounter.GetDayData(time.Now())
-		// fmt.Printf("serviceCounter qps:%v  daycount:%v", serviceCounter.QPS, dayServiceCount)
 
 		c.Next()
 	}

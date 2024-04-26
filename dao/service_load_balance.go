@@ -82,7 +82,7 @@ func init() {
 }
 
 func (lbr *LoadBalancer) GetLoadBalancer(service *ServiceDetail) (load_balance.LoadBalance, error) {
-	for _, lbrItem := range lbr.LoadBanlanceSlice {
+	for _, lbrItem := range lbr.LoadBanlanceSlice { // 查找是否有现存的负载均衡器
 		if lbrItem.ServiceName == service.Info.ServiceName {
 			return lbrItem.LoadBanlance, nil
 		}
@@ -94,11 +94,11 @@ func (lbr *LoadBalancer) GetLoadBalancer(service *ServiceDetail) (load_balance.L
 	if service.Info.LoadType == public.LoadTypeTCP || service.Info.LoadType == public.LoadTypeGRPC {
 		schema = ""
 	}
-	ipList := service.LoadBalance.GetIPListByModel()
-	weightList := service.LoadBalance.GetWeightListByModel()
+	ipList := service.LoadBalance.GetIPListByModel()         // 获取下游ip列表
+	weightList := service.LoadBalance.GetWeightListByModel() // 获取下游ip权重列表
 	ipConf := map[string]string{}
 	for ipIndex, ipItem := range ipList {
-		ipConf[ipItem] = weightList[ipIndex]
+		ipConf[ipItem] = weightList[ipIndex] // ip对应权重
 	}
 	//fmt.Println("ipConf", ipConf)
 	mConf, err := load_balance.NewLoadBalanceCheckConf(fmt.Sprintf("%s%s", schema, "%s"), ipConf)

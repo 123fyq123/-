@@ -99,7 +99,7 @@ func (c *ConsistentHashBanlance) SetConf(conf LoadBalanceConf) {
 
 func (c *ConsistentHashBanlance) Update() {
 	if conf, ok := c.conf.(*LoadBalanceZkConf); ok {
-		fmt.Println("Update get conf:", conf.GetConf())
+		// fmt.Println("Update get conf:", conf.GetConf())
 		c.keys = nil
 		c.hashMap = nil
 		for _, ip := range conf.GetConf() {
